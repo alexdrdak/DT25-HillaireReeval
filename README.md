@@ -1,6 +1,6 @@
 ## Hillaire's benchmark on instancing
 
-Hillaire, in his `Improving Performance by Reducing Calls to the Driver` article in [*OpenGL Insights*](http://www.openglinsights.com/) presented results from his benchmark on efficiency of instancing, in which he compared OpenGL's instancing methods. While insightful at the time, the article now shows its age and contains several limitations in the context of modern OpenGL practices—for instance, the use of uniforms to transmit instance data. 
+Hillaire, in his `Improving Performance by Reducing Calls to the Driver` article in [*OpenGL Insights*](http://www.openglinsights.com/) presented results from his benchmark on efficiency of instancing, in which he compared OpenGL's instancing methods. While insightful at the time, the article now shows its age and contains several limitations in the context of modern OpenGL practicesâ€”for instance, the use of uniforms to transmit instance data. 
 
 At the time of Hillaire's writing, only the uniform storage was available - and thus being restricted to a certain, relatively low data limit. Nowadays, modern OpenGL applications utilize *SSBO*s freely, which provide an efficient way of transporting data, unrestricted to allocate up to possibly whole available GPGPU memory. Additionally, this benchmark had also pointed out a certain **breaking point**, where noninstanced method performed better than those instanced. This benchmark needed a little refresh in modern context. 
 
@@ -17,16 +17,24 @@ For each approach, 3 different sizes of data are to be tested: 1, 2 or 3 `vec3` 
 The code provides multiple values to be redefined:
 
 | `#define` flag | values | default value | note |
-|--|--|--|
-|`D_REPEATS` | `int` | `10`  | defines how many times each data-size will be repeated |
+|--|--|--|--|
+|`D_REPEATS` | `int` | `10`  | defines how many times each batch will be repeated |
 |`D_INSTANCED` | `int<0, 1, 2>` | `0` |  `0`: noninstanced, `1`: vertex attribute instanced, `2`: SSBO instanved |
 |`D_VEC` | `int[0, 2]`| `1` | selects the number ov `vec3` sent per vertex|
-|`D_TEST_TIME` | `int` |`3` | the time it takes one data-size to execute |
+|`D_TEST_TIME` | `int` |`3` | the time one batch is given to execute |
 |`D_ALLOCATE_PERSEC` | `int` | `5000` | internal variable deciding on the fixed size of the buffer that keeps the evaluated values of tests. defines how many values are at most expected per frame.  |
 |`D_INIT_SIZE` | `int` | `1048576` | defines the starting amount of vertices from which the tests will grow up to the `D_DEST_SIZE`|
-|`D_DEST_SIZE` | `int`| `4194304` |  desired destination amount of vertices |
+|`D_DEST_SIZE` | `int`| `4194304` |  desired destination amount of vertices.  |
 
-The results are available being printed into console. 
+The `CMakeLists.txt` also generates a `d_runtests.bat` which executes all built executaables. The batch size is defined as `D_DEST_SIZE / D_INIT_SIZE`. 
+
+The results are available being printed into console. The output measure is the average ms per frame - the lower, the better. An example of proper output:
+```
+[0/4] glDrawElements(); instances: 1048576; final avg ms: 177.403
+[1/4] glDrawElements(); instances: 2097152; final avg ms: 355.623
+[2/4] glDrawElements(); instances: 3145728; final avg ms: 529.29
+[3/4] glDrawElements(); instances: 4194304; final avg ms: 708.404
+```
 
 
 ---
